@@ -2,9 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\Timetable;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 
 class TimetableNotification extends Command
 {
@@ -25,8 +28,11 @@ class TimetableNotification extends Command
     /**
      * Execute the console command.
      */
-    public function handle(){
-        $cachedResponse = Cache::remember('timetable', now()->addHour(), function(){
+    public function handle()
+    {
+    $startOfWeek = now()->addWeek()->startOfWeek();
+    $endOfWeek = now()->addWeek()->endOfWeek();
+        $cachedResponse = Cache::remember($startOfWeek->toIso8601String(), now()->addHour(), function(){
             return Http::get('https://tahveltp.edu.ee/hois_back/timetableevents/timetableSearch',[
             'from' => now()->startOfWeek()->toIso8601String(),
             'lang' => 'ET',
@@ -37,8 +43,32 @@ class TimetableNotification extends Command
             'thru' => now()->endOfWeek()->toIso8601String(),
         ])->json();
     });
+        $content = data_get($cachedResponse, 'content', []);
 
-        dd($cachedResponse);
+        $items = [];
 
+        foreach ($content as $item) {
+
+            $date = Carbon::parse(data_get($item, 'date'))->locale('et');
+
+            $items[$date->dayName] [] = [
+                'name' => data_get($item, 'nameEt'),
+                'date' => $date->translatedFormat('d.F Y'),
+                'timeStart' => data_get($item, 'timeStart'),
+                'timeEnd' => data_get($item, 'timeEnd'),
+                'room' => data_get($item, 'rooms.0.roomCode')
+            ];
+        }
+
+        Mail::to('example@example.com')
+        ->send(new Timetable($items, $startOfWeek->locale('et')->translatedFormat('d. F Y'), $endOfWeek->locale('et')->translatedFormat('d. F Y')));
+
+        foreach ($items as $day => $lessons) {
+            $this->info($day);
+            $this->table(
+                ['Nimetus', 'Kuupäev', 'Algus', 'Lõpp', 'Klass'],
+                $lessons
+            );
+        }
     }
 }
