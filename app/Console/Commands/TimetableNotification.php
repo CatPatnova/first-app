@@ -30,9 +30,10 @@ class TimetableNotification extends Command
      */
     public function handle()
     {
-    $startOfWeek = now()->addWeek()->startOfWeek();
-    $endOfWeek = now()->addWeek()->endOfWeek();
-        $cachedResponse = Cache::remember($startOfWeek->toIso8601String(), now()->addHour(), function(){
+        $startOfWeek = now()->addWeek()->startOfWeek();
+        $endOfWeek = now()->addWeek()->endOfWeek();
+
+        $cachedResponse = Cache::remember($startOfWeek->toIso8601String(), now()->addHour(), function() use ($startOfWeek , $endOfWeek){
             return Http::get('https://tahveltp.edu.ee/hois_back/timetableevents/timetableSearch',[
             'from' => $startOfWeek->toIso8601String(),
             'lang' => 'ET',
@@ -40,7 +41,7 @@ class TimetableNotification extends Command
             'schoolId' => 38,
             'size' => 50,
             'studentGroups' => '4b26d1e5-11ac-4c63-840e-46c450c529ee',
-            'thru' => now()->endOfWeek()->toIso8601String(),
+            'thru' => $endOfWeek()->toIso8601String(),
         ])->json();
     });
         $content = data_get($cachedResponse, 'content', []);
