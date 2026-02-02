@@ -60,9 +60,12 @@ class TimetableNotification extends Command
                 'room' => data_get($item, 'rooms.0.roomCode')
             ];
         }
+        
+        app(ModelsTimeTable::class)->notify(new )
 
-        Mail::to(config('mail.notification.email'))
-        ->send(new Timetable($items, $startOfWeek->locale('et')->translatedFormat('d. F Y'), $endOfWeek->locale('et')->translatedFormat('d. F Y')));
+        //Mail::to(config('mail.notification.email'))
+        //->send(new Timetable($items, $startOfWeek->locale('et')->translatedFormat('d. F Y'),
+        // $endOfWeek->locale('et')->translatedFormat('d. F Y')));
 
         foreach ($items as $day => $lessons) {
             $this->info($day);
