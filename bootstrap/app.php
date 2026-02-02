@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withSchedule(function (Schedule $schedule) {
-    $schedule->command(TimetableNotification::class)->everyMinute();
+    $schedule->command(TimetableNotification::class)->weeklyOn(7, '12:00')->timezone('Europe/Tallinn');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
