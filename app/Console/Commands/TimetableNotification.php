@@ -34,7 +34,7 @@ class TimetableNotification extends Command
     $endOfWeek = now()->addWeek()->endOfWeek();
         $cachedResponse = Cache::remember($startOfWeek->toIso8601String(), now()->addHour(), function(){
             return Http::get('https://tahveltp.edu.ee/hois_back/timetableevents/timetableSearch',[
-            'from' => now()->startOfWeek()->toIso8601String(),
+            'from' => $startOfWeek->toIso8601String(),
             'lang' => 'ET',
             'page' => 0,
             'schoolId' => 38,
