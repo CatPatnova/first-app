@@ -41,8 +41,8 @@ class TimetableNotification extends Command
             'schoolId' => 38,
             'size' => 50,
             'studentGroups' => '4b26d1e5-11ac-4c63-840e-46c450c529ee',
-            'thru' => $endOfWeek()->toIso8601String(),
-        ])->json();
+            'thru' => $endOfWeek->toIso8601String(),
+            ])->json();
     });
         $content = data_get($cachedResponse, 'content', []);
 
